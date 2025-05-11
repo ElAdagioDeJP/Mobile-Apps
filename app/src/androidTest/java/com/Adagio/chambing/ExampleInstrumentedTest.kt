@@ -1,4 +1,4 @@
-package com.Adagio.learning
+package com.Adagio.chambing
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

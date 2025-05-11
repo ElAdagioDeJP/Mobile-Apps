@@ -1,4 +1,4 @@
-package com.Adagio.learning.exercise
+package com.Adagio.chambing.exercise
 
 /**
  * Las entradas de cine suelen tener un precio diferente según la edad de los espectadores.

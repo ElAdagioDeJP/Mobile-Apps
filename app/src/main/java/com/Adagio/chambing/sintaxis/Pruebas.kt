@@ -1,4 +1,4 @@
-package com.Adagio.learning
+package com.Adagio.chambing.sintaxis
 
 fun main(){
     showMyName("Pablo")

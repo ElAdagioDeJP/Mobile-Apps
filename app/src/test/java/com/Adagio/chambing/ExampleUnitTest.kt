@@ -1,4 +1,4 @@
-package com.Adagio.learning
+package com.Adagio.chambing
 
 import org.junit.Test
 
