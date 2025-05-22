@@ -1,0 +1,252 @@
+import React from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+  ImageBackground,
+  FlatList,
+  Platform
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const COLORS = {
+  primary: '#6C5CE7',
+  secondary: '#00B894',
+  accent: '#0984E3',
+  light: '#F0F4F8',
+  greyBg: '#ECEFF1',
+  greyText: '#7F8FA6'
+};
+
+const categories = [
+  { key: 'futbol', label: 'Fútbol', icon: 'soccer', color: COLORS.primary },
+  { key: 'baloncesto', label: 'Baloncesto', icon: 'basketball', color: COLORS.secondary },
+  { key: 'ajedrez', label: 'Ajedrez', icon: 'chess-knight', color: COLORS.accent },
+  { key: 'voleibol', label: 'Voleibol', icon: 'volleyball', color: '#FD79A8' },
+  { key: 'atletismo', label: 'Atletismo', icon: 'run', color: '#E17055' },
+];
+
+const eventos = [
+  { id: '1', title: 'Finales de Fútbol', time: 'Mañana, 3 PM'},
+  { id: '2', title: 'Semifinales', time: 'Hoy, 5 PM'},
+];
+
+const destacados = [
+  { id: '1', title: 'Campeonato de Ajedrez', subtitle: 'Ganador: John Doe'},
+  { id: '2', title: 'Partido de Vóley',      subtitle: 'Equipo A vs B'},
+];
+
+const Main = () => (
+  <SafeAreaView style={styles.safe}>
+    <ScrollView style={styles.container}>
+
+      <Text style={styles.header}>La Fe</Text>
+
+      <View style={styles.searchWrapper}>
+        <Icon name="magnify" size={20} color={COLORS.greyText} />
+        <TextInput
+          placeholder="Buscar competiciones"
+          placeholderTextColor={COLORS.greyText}
+          style={styles.searchInput}
+        />
+      </View>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categories}>
+        {categories.map(cat => (
+          <TouchableOpacity key={cat.key} style={[styles.catButton, { backgroundColor: cat.color + '20' }]}>
+            <Icon name={cat.icon} size={24} color={cat.color} />
+            <Text style={[styles.catLabel, { color: cat.color }]}>{cat.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <Text style={styles.sectionTitle}>Próximos Eventos</Text>
+      <FlatList
+        data={eventos}
+        keyExtractor={item => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingRight: 16 }}
+        renderItem={({item}) => (
+          <ImageBackground source={item.image} style={styles.card} imageStyle={styles.cardImage}>
+            <View style={styles.cardTextBg}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardTime}>{item.time}</Text>
+            </View>
+          </ImageBackground>
+        )}
+      />
+
+      <Text style={styles.sectionTitle}>Destacados Recientes</Text>
+      <FlatList
+        data={destacados}
+        keyExtractor={item => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingRight: 16 }}
+        renderItem={({item}) => (
+          <ImageBackground source={item.image} style={styles.card} imageStyle={styles.cardImage}>
+            <View style={styles.cardTextBg}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardTime}>{item.subtitle}</Text>
+            </View>
+          </ImageBackground>
+        )}
+      />
+
+    </ScrollView>
+
+    <View style={styles.tabBar}>
+      {['home', 'calendar', 'grid', 'account'].map((icon, i) => (
+        <TouchableOpacity key={icon} style={styles.tabButton}>
+          <Icon
+            name={icon}
+            size={24}
+            color={ i===0 ? COLORS.primary : COLORS.greyText }
+          />
+          <Text style={[styles.tabLabel, i===0 && { color: COLORS.primary }]}>
+            {['Inicio','Horario','Puntajes','Perfil'][i]}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </SafeAreaView>
+);
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: COLORS.light
+  },
+  container: {
+    flex: 1,
+    padding: 16
+  },
+  header: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    color: COLORS.primary
+  },
+
+  searchWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    height: 44,
+    marginBottom: 20,
+    // sombra iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // sombra Android
+    elevation: 3,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 15,
+    color: '#333'
+  },
+
+  categories: {
+    marginBottom: 28
+  },
+  catButton: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    // sutil sombra
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      }
+    })
+  },
+  catLabel: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '600'
+  },
+
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333'
+  },
+
+  card: {
+    width: 210,
+    height: 130,
+    borderRadius: 14,
+    overflow: 'hidden',
+    marginRight: 16,
+    // sombra bajo la tarjeta
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 4,
+      }
+    })
+  },
+  cardImage: {},
+  cardTextBg: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    padding: 10
+  },
+  cardTitle: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700'
+  },
+  cardTime: {
+    color: '#EEE',
+    fontSize: 12,
+    marginTop: 2
+  },
+
+  tabBar: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderColor: COLORS.greyBg,
+    paddingVertical: 10,
+    justifyContent: 'space-around',
+    backgroundColor: '#FFF'
+  },
+  tabButton: {
+    alignItems: 'center'
+  },
+  tabLabel: {
+    fontSize: 10,
+    color: COLORS.greyText,
+    marginTop: 2
+  }
+});
+
+export default Main;
