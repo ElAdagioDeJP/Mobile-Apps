@@ -22,7 +22,7 @@ const COLORS = {
   greyText: '#7F8FA6'
 };
 
-const categories = [
+export const categories = [
   { key: 'futbol', label: 'Fútbol', icon: 'soccer', color: COLORS.primary },
   { key: 'baloncesto', label: 'Baloncesto', icon: 'basketball', color: COLORS.secondary },
   { key: 'ajedrez', label: 'Ajedrez', icon: 'chess-knight', color: COLORS.accent },
@@ -30,21 +30,12 @@ const categories = [
   { key: 'atletismo', label: 'Atletismo', icon: 'run', color: '#E17055' },
 ];
 
-const eventos = [
-  { id: '1', title: 'Finales de Fútbol', time: 'Mañana, 3 PM'},
-  { id: '2', title: 'Semifinales', time: 'Hoy, 5 PM'},
-];
 
-const destacados = [
-  { id: '1', title: 'Campeonato de Ajedrez', subtitle: 'Ganador: John Doe'},
-  { id: '2', title: 'Partido de Vóley',      subtitle: 'Equipo A vs B'},
-];
-
-const Main = () => (
+const Main = ({ navigation }) => (
   <SafeAreaView style={styles.safe}>
     <ScrollView style={styles.container}>
 
-      <Text style={styles.header}>La Fe</Text>
+      <Text style={styles.header}>La Fe Score</Text>
 
       <View style={styles.searchWrapper}>
         <Icon name="magnify" size={20} color={COLORS.greyText} />
@@ -57,63 +48,14 @@ const Main = () => (
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categories}>
         {categories.map(cat => (
-          <TouchableOpacity key={cat.key} style={[styles.catButton, { backgroundColor: cat.color + '20' }]}>
+          <TouchableOpacity key={cat.key} style={[styles.catButton, { backgroundColor: cat.color + '20' }]} onPress={() => navigation.navigate('Category', { key: cat.key, label: cat.label })}>
             <Icon name={cat.icon} size={24} color={cat.color} />
             <Text style={[styles.catLabel, { color: cat.color }]}>{cat.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      <Text style={styles.sectionTitle}>Próximos Eventos</Text>
-      <FlatList
-        data={eventos}
-        keyExtractor={item => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 16 }}
-        renderItem={({item}) => (
-          <ImageBackground source={item.image} style={styles.card} imageStyle={styles.cardImage}>
-            <View style={styles.cardTextBg}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardTime}>{item.time}</Text>
-            </View>
-          </ImageBackground>
-        )}
-      />
-
-      <Text style={styles.sectionTitle}>Destacados Recientes</Text>
-      <FlatList
-        data={destacados}
-        keyExtractor={item => item.id}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 16 }}
-        renderItem={({item}) => (
-          <ImageBackground source={item.image} style={styles.card} imageStyle={styles.cardImage}>
-            <View style={styles.cardTextBg}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardTime}>{item.subtitle}</Text>
-            </View>
-          </ImageBackground>
-        )}
-      />
-
     </ScrollView>
-
-    <View style={styles.tabBar}>
-      {['home', 'calendar', 'grid', 'account'].map((icon, i) => (
-        <TouchableOpacity key={icon} style={styles.tabButton}>
-          <Icon
-            name={icon}
-            size={24}
-            color={ i===0 ? COLORS.primary : COLORS.greyText }
-          />
-          <Text style={[styles.tabLabel, i===0 && { color: COLORS.primary }]}>
-            {['Inicio','Horario','Puntajes','Perfil'][i]}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
   </SafeAreaView>
 );
 
