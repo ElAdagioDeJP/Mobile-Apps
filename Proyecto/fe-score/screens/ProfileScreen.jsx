@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -34,7 +35,11 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.select({ ios: 'padding', android: null })}
     >
-      <Text style={styles.title}>Bienvenido a La Fe Score</Text>
+
+      <Image
+        source={require('../assets/logo.png')}
+        style={{ width: 200, height: 63, alignSelf: 'center', marginBottom: 16 }}
+      />
 
       <View style={styles.inputWrapper}>
         <Icon name="email-outline" size={20} color={COLORS.greyText} />
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   buttonDisabled: {
-    backgroundColor: '#A29BFE',
+    backgroundColor: '#2D529F',
   },
   buttonText: {
     color: COLORS.white,

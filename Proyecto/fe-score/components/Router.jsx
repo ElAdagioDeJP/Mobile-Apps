@@ -40,7 +40,7 @@ export default function Router() {
             };
             return <Icon name={icons[route.name]} size={size} color={color} />;
           },
-          tabBarActiveTintColor: '#6C5CE7',
+          tabBarActiveTintColor: '#2D529F',
           tabBarInactiveTintColor: '#7F8FA6',
           headerShown: false,
         })}

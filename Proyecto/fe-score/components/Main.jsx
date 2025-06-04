@@ -7,7 +7,8 @@ import {
   TextInput,
   FlatList,
   TouchableOpacity,
-  Platform
+  Platform,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -50,7 +51,10 @@ const Main = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>La Fe Score</Text>
+        <Image
+          source={require('../assets/logo.png')}
+          style={{ width: 200, height: 63, alignSelf: 'center', marginBottom: 16, marginTop: 16 }}
+        ></Image>
         <View style={styles.searchWrapper}>
           <Icon name="magnify" size={20} color={COLORS.greyText} />
           <TextInput
