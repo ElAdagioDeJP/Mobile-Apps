@@ -45,7 +45,7 @@ export default function LoginScreen({ navigation }) {
         <Icon name="email-outline" size={20} color={COLORS.greyText} />
         <TextInput
           style={styles.input}
-          placeholder="Correo electrónico"
+          placeholder="Usuario"
           placeholderTextColor={COLORS.greyText}
           keyboardType="email-address"
           autoCapitalize="none"
