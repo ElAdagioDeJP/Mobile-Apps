@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const COLORS = {
   primary: '#6C5CE7',
-  greyText: '#7F8FA6',
+  greyText: '#F1F1F1',
   light: '#F0F4F8',
   white: '#FFF',
 };
@@ -81,7 +81,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.light,
+    backgroundColor: '#1D1B39',
     padding: 24,
     justifyContent: 'center',
   },
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: '#5564eb',
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 48,
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
-    color: '#333',
+    color: '#FFF',
   },
   button: {
     backgroundColor: COLORS.primary,

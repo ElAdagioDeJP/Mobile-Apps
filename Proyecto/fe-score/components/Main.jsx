@@ -17,7 +17,7 @@ const COLORS = {
   secondary: '#00B894',
   accent: '#0984E3',
   light: '#FFFFFF',
-  greyText: '#7F8FA6',
+  greyText: '#F1F1F1',
   greyBg: '#F7F7F7'
 };
 
@@ -55,14 +55,6 @@ const Main = ({ navigation }) => {
           source={require('../assets/logo.png')}
           style={{ width: 200, height: 63, alignSelf: 'center', marginBottom: 16, marginTop: 16 }}
         ></Image>
-        <View style={styles.searchWrapper}>
-          <Icon name="magnify" size={20} color={COLORS.greyText} />
-          <TextInput
-            placeholder="Buscar competiciones"
-            placeholderTextColor={COLORS.greyText}
-            style={styles.searchInput}
-          />
-        </View>
       </View>
 
       <FlatList
@@ -79,31 +71,45 @@ const Main = ({ navigation }) => {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.light,
+    backgroundColor: '#1D1B39',  // Fondo oscuro premium
     padding: 16
   },
   headerContainer: {
-    marginBottom: 16
+    marginBottom: 16,
+    backgroundColor: '#1D1B39',  // Azul intenso para el encabezado
+    borderRadius: 12,
+    padding: 16,
+    marginTop: Platform.OS === 'android' ? 18 : 0, // Espacio para la barra de estado en Android
+    // Sombra premium
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   header: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.accent,
-    marginBottom: 8
+    fontWeight: '800',  // Más grueso para mayor impacto
+    color: '#FBBF09',   // Dorado premium
+    marginBottom: 8,
+    letterSpacing: 0.5, // Mejor espaciado
   },
   searchWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.greyBg,
+    backgroundColor: '#2D529F',  // Azul intenso
     borderRadius: 20,
-    paddingHorizontal: 12,
-    height: 40
+    paddingHorizontal: 16,       // Más espaciado
+    height: 48,                 // Altura aumentada
+    borderWidth: 1,             // Borde dorado
+    borderColor: '#FBBF09',
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#333'
+    marginLeft: 12,             // Más espaciado
+    fontSize: 16,               // Tamaño aumentado
+    color: '#E8E8E8',           // Texto claro
+    fontWeight: '600'
   },
   list: {
     justifyContent: 'space-between'
@@ -111,17 +117,18 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     margin: 8,
-    borderRadius: 8,
-    paddingVertical: 20,
+    borderRadius: 12,           // Bordes más redondeados
+    paddingVertical: 24,        // Más espaciado vertical
     alignItems: 'center',
     justifyContent: 'center',
-    // sombra más marcada
-    
+    backgroundColor: '#2D529F', // Fondo azul premium
+    // Sombra mejorada
   },
   cardLabel: {
-    marginTop: 8,
+    marginTop: 12,              // Más espaciado
     fontSize: 16,
-    fontWeight: '600'
+    fontWeight: '700',          // Más grueso
+    color: '#FBBF09',           // Dorado premium
   }
 });
 

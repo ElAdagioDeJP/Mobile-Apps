@@ -10,6 +10,7 @@ import {
   Platform,
   TextInput,
   Alert,
+  ScrollView,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,17 +20,27 @@ const database = require("../database.json");
 export default function CategoryScreen({ route, navigation }) {
   const { key, label } = route.params;
   const storageKey = `sections_${key}`;
-  const isGendered = [
-    "atletismo_velocidad",
-    "atletismo_maraton",
-    "atletismo_relevo",
-    "vuelo_avion",
-  ].includes(key);
+
+  const isAtletismo = key.startsWith("atletismo_");
+  const isMaraton = key === "atletismo_maraton";
+  const isVelocidad = key === "atletismo_velocidad";
+  const isRelevo = key === "atletismo_relevo";
+
+  const positionsCount = isMaraton
+    ? 8
+    : isVelocidad
+    ? 4
+    : isRelevo
+    ? 3
+    : 0;
 
   const [sections, setSections] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [codeA, setCodeA] = useState("");
   const [codeB, setCodeB] = useState("");
+  const [positions, setPositions] = useState(
+    Array(positionsCount).fill("")
+  );
   const [gender, setGender] = useState("femenino");
 
   useEffect(() => {
@@ -46,56 +57,48 @@ export default function CategoryScreen({ route, navigation }) {
   };
 
   const saveSection = async () => {
-    const newSection = {
-      id: Date.now().toString(),
-      codeA,
-      codeB,
-      gender: isGendered ? gender : null,
-      scoreA: 0,
-      scoreB: 0,
-      finished: false,
-    };
+    let newSection = { id: Date.now().toString(), finished: false };
+    if (isAtletismo) {
+      newSection = {
+        ...newSection,
+        gender,
+        positions: positions.map((p) => p.toUpperCase()),
+      };
+    } else {
+      newSection = {
+        ...newSection,
+        codeA,
+        codeB,
+        gender: null,
+        scoreA: 0,
+        scoreB: 0,
+      };
+    }
     await persist([...sections, newSection]);
     setShowForm(false);
     setCodeA("");
     setCodeB("");
+    setPositions(Array(positionsCount).fill(""));
     setGender("femenino");
   };
 
-  // Eliminar sección directamente usando persist para asegurar re-render
   const deleteSection = async (id) => {
     try {
       const newList = sections.filter((s) => s.id !== id);
       await persist(newList);
     } catch (error) {
       Alert.alert("Error", "No se pudo eliminar la sección");
-      console.error("deleteSection error:", error);
+      console.error(error);
     }
   };
 
   const confirmDelete = (id) => {
-    // Ejecutar esto en cualquier parte de tu código (ej: en un botón)
-    const clearAsyncStorage = async () => {
-      try {
-        await AsyncStorage.clear();
-        console.log("AsyncStorage limpiado correctamente.");
-      } catch (error) {
-        console.error("Error al limpiar AsyncStorage:", error);
-      }
-    };
-
-    // Llama a la función
-    clearAsyncStorage();
     Alert.alert(
       "Eliminar sección",
-      "¿Estás seguro de que deseas eliminar esta sección?",
+      "¿Estás seguro?",
       [
         { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: () => deleteSection(id),
-        },
+        { text: "Eliminar", style: "destructive", onPress: () => deleteSection(id) },
       ]
     );
   };
@@ -107,129 +110,137 @@ export default function CategoryScreen({ route, navigation }) {
     await persist(updated);
   };
 
-  const updateScoreVal = async (id, field, delta) => {
+  const changeScore = async (id, side, delta) => {
     const updated = sections.map((s) => {
-      if (s.id === id) {
-        let newVal = (s[field] || 0) + delta;
-        if (newVal < 0) newVal = 0;
-        if (newVal > 10000) newVal = 10000;
-        return { ...s, [field]: newVal };
-      }
-      return s;
+      if (s.id !== id) return s;
+      const key = side === "A" ? "scoreA" : "scoreB";
+      const next = Math.max(0, s[key] + delta);
+      return { ...s, [key]: next };
     });
     await persist(updated);
   };
 
-  const onChangeScore = async (id, field, text) => {
-    if (text === "") {
-      const updatedEmpty = sections.map((s) =>
-        s.id === id ? { ...s, [field]: 0 } : s
-      );
-      await persist(updatedEmpty);
-      return;
-    }
-    let num = parseInt(text, 10);
-    if (isNaN(num)) return;
-    if (num < 0) num = 0;
-    if (num > 10000) num = 10000;
-    const updated = sections.map((s) =>
-      s.id === id ? { ...s, [field]: num } : s
-    );
+  const changeScoreDirect = async (id, side, text) => {
+    const val = parseInt(text, 10);
+    const updated = sections.map((s) => {
+      if (s.id !== id) return s;
+      const key = side === "A" ? "scoreA" : "scoreB";
+      return { ...s, [key]: isNaN(val) ? 0 : val };
+    });
     await persist(updated);
   };
 
+  const renderPositions = (item) => (
+    <View style={styles.positionsContainer}>
+      {item.positions.map((pos, idx) => (
+        <View key={idx} style={styles.positionRow}>
+          <Text style={styles.positionLabel}>{`${idx + 1}°:`}</Text>
+          <TextInput
+            style={[styles.positionInput, item.finished && styles.disabledInput]}
+            value={pos}
+            editable={!item.finished}
+          />
+        </View>
+      ))}
+    </View>
+  );
+
   const renderSection = ({ item }) => (
     <View style={styles.card}>
-      <View style={styles.matchHeader}>
-        <Text style={styles.teamText}>{item.codeA}</Text>
-        <View style={styles.headerIcons}>
+
+      {/* Íconos centrados arriba solo no-atletismo */}
+      {!isAtletismo && (
+        <View style={styles.topIcons}>
           <TouchableOpacity
             onPress={() => toggleFinished(item.id)}
-            style={styles.iconBtn}
+            disabled={false}
           >
             <Icon
               name={item.finished ? "flag-checkered" : "flag-outline"}
-              size={24}
+              size={28}
               color={item.finished ? "#4CAF50" : "#FFF"}
             />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => confirmDelete(item.id)}
-            style={styles.iconBtn}
+            style={styles.iconSpacing}
           >
-            <Icon name="trash-can-outline" size={24} color="#E74C3C" />
+            <Icon name="trash-can-outline" size={28} color="#E74C3C" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.teamText}>{item.codeB}</Text>
-      </View>
-      <View style={styles.scoreRow}>
-        <View style={styles.scoreControl}>
-          <TouchableOpacity
-            disabled={item.finished}
-            onPress={() => updateScoreVal(item.id, "scoreA", -1)}
-          >
-            <Icon
-              name="minus-circle"
-              size={28}
-              color={item.finished ? "#ccc" : "#E74C3C"}
+      )}
+
+      <View style={styles.matchHeader}>
+        {!isAtletismo && <Text style={styles.teamText}>{item.codeA}</Text>}
+        {isAtletismo && <Text style={styles.teamText}>Atletismo</Text>}
+
+        {isAtletismo ? (
+          renderPositions(item)
+        ) : (
+          <View style={styles.scoreControls}>
+            {/* – / + A */}
+            <TouchableOpacity
+              onPress={() => changeScore(item.id, "A", -1)}
+              disabled={item.finished}
+              style={item.finished && styles.disabledBtn}
+            >
+              <Icon name="minus-circle-outline" size={24} color="#FFF" />
+            </TouchableOpacity>
+            <TextInput
+              style={[
+                styles.scoreInput,
+                item.finished && styles.disabledInput,
+              ]}
+              keyboardType="numeric"
+              value={String(item.scoreA)}
+              editable={!item.finished}
+              onChangeText={(t) => changeScoreDirect(item.id, "A", t)}
             />
-          </TouchableOpacity>
-          <TextInput
-            style={[styles.scoreInput, item.finished && styles.disabledInput]}
-            keyboardType="numeric"
-            value={String(item.scoreA)}
-            editable={!item.finished}
-            onChangeText={(t) => onChangeScore(item.id, "scoreA", t)}
-          />
-          <TouchableOpacity
-            disabled={item.finished}
-            onPress={() => updateScoreVal(item.id, "scoreA", 1)}
-          >
-            <Icon
-              name="plus-circle"
-              size={28}
-              color={item.finished ? "#ccc" : "#2ECC71"}
+            <TouchableOpacity
+              onPress={() => changeScore(item.id, "A", +1)}
+              disabled={item.finished}
+              style={item.finished && styles.disabledBtn}
+            >
+              <Icon name="plus-circle-outline" size={24} color="#FFF" />
+            </TouchableOpacity>
+
+            <Text style={styles.vsText}>–</Text>
+
+            {/* – / + B */}
+            <TouchableOpacity
+              onPress={() => changeScore(item.id, "B", -1)}
+              disabled={item.finished}
+              style={item.finished && styles.disabledBtn}
+            >
+              <Icon name="minus-circle-outline" size={24} color="#FFF" />
+            </TouchableOpacity>
+            <TextInput
+              style={[
+                styles.scoreInput,
+                item.finished && styles.disabledInput,
+              ]}
+              keyboardType="numeric"
+              value={String(item.scoreB)}
+              editable={!item.finished}
+              onChangeText={(t) => changeScoreDirect(item.id, "B", t)}
             />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.scoreControl}>
-          <TouchableOpacity
-            disabled={item.finished}
-            onPress={() => updateScoreVal(item.id, "scoreB", -1)}
-          >
-            <Icon
-              name="minus-circle"
-              size={28}
-              color={item.finished ? "#ccc" : "#E74C3C"}
-            />
-          </TouchableOpacity>
-          <TextInput
-            style={[styles.scoreInput, item.finished && styles.disabledInput]}
-            keyboardType="numeric"
-            value={String(item.scoreB)}
-            editable={!item.finished}
-            onChangeText={(t) => onChangeScore(item.id, "scoreB", t)}
-          />
-          <TouchableOpacity
-            disabled={item.finished}
-            onPress={() => updateScoreVal(item.id, "scoreB", 1)}
-          >
-            <Icon
-              name="plus-circle"
-              size={28}
-              color={item.finished ? "#ccc" : "#2ECC71"}
-            />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={() => changeScore(item.id, "B", +1)}
+              disabled={item.finished}
+              style={item.finished && styles.disabledBtn}
+            >
+              <Icon name="plus-circle-outline" size={24} color="#FFF" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!isAtletismo && <Text style={styles.teamText}>{item.codeB}</Text>}
       </View>
     </View>
   );
 
   const validateCode = (text) =>
-    text
-      .toLowerCase()
-      .replace(/[^1-6ab]/g, "")
-      .slice(0, 2);
+    text.toLowerCase().replace(/[^1-6ab]/g, "").slice(0, 2);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -254,67 +265,97 @@ export default function CategoryScreen({ route, navigation }) {
       />
 
       <Modal visible={showForm} animationType="fade" transparent>
-        <View style={styles.modalBg}>
+        <ScrollView contentContainerStyle={styles.modalBg}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Crear Sección</Text>
-            <View style={styles.inputRow}>
-              <TextInput
-                placeholder="1a"
-                style={styles.codeInput}
-                value={codeA}
-                onChangeText={(t) => setCodeA(validateCode(t))}
-                maxLength={2}
-              />
-              <TextInput
-                placeholder="1b"
-                style={styles.codeInput}
-                value={codeB}
-                onChangeText={(t) => setCodeB(validateCode(t))}
-                maxLength={2}
-              />
-            </View>
-            {isGendered && (
-              <View style={styles.genderRow}>
-                <TouchableOpacity
-                  onPress={() => setGender("femenino")}
-                  style={[
-                    styles.genderBtn,
-                    gender === "femenino" && styles.genderSelected,
-                  ]}
-                >
-                  <Icon
-                    name="gender-female"
-                    size={24}
-                    color={gender === "femenino" ? "#2D529F" : "#FFF"}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setGender("masculino")}
-                  style={[
-                    styles.genderBtn,
-                    gender === "masculino" && styles.genderSelected,
-                  ]}
-                >
-                  <Icon
-                    name="gender-male"
-                    size={24}
-                    color={gender === "masculino" ? "#2D529F" : "#FFF"}
-                  />
-                </TouchableOpacity>
+
+            {isAtletismo ? (
+              <>
+                <View style={styles.genderRow}>
+                  <TouchableOpacity
+                    onPress={() => setGender("femenino")}
+                    style={[
+                      styles.genderBtn,
+                      gender === "femenino" && styles.genderSelected,
+                    ]}
+                  >
+                    <Icon
+                      name="gender-female"
+                      size={24}
+                      color={gender === "femenino" ? "#2D529F" : "#FFF"}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setGender("masculino")}
+                    style={[
+                      styles.genderBtn,
+                      gender === "masculino" && styles.genderSelected,
+                    ]}
+                  >
+                    <Icon
+                      name="gender-male"
+                      size={24}
+                      color={gender === "masculino" ? "#2D529F" : "#FFF"}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {positions.map((pos, idx) => (
+                  <View key={idx} style={styles.positionRow}>
+                    <Text style={styles.positionLabel}>{`${idx + 1}°:`}</Text>
+                    <TextInput
+                      placeholder={`${idx + 1}A`}
+                      style={styles.positionInput}
+                      value={positions[idx]}
+                      onChangeText={(t) =>
+                        setPositions((prev) => {
+                          const copy = [...prev];
+                          copy[idx] = t.toUpperCase().slice(0, 2);
+                          return copy;
+                        })
+                      }
+                      maxLength={2}
+                    />
+                  </View>
+                ))}
+              </>
+            ) : (
+              <View style={styles.inputRow}>
+                <TextInput
+                  placeholder="1A"
+                  style={styles.codeInput}
+                  value={codeA}
+                  onChangeText={(t) => setCodeA(validateCode(t))}
+                  maxLength={2}
+                />
+                <TextInput
+                  placeholder="1B"
+                  style={styles.codeInput}
+                  value={codeB}
+                  onChangeText={(t) => setCodeB(validateCode(t))}
+                  maxLength={2}
+                />
               </View>
             )}
+
             <View style={styles.actionsRow}>
               <TouchableOpacity onPress={() => setShowForm(false)}>
                 <Text style={styles.cancelText}>Cerrar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={saveSection}
-                disabled={!(codeA.length === 2 && codeB.length === 2)}
+                disabled={
+                  isAtletismo
+                    ? positions.some((p) => p.length < 1)
+                    : !(codeA.length === 2 && codeB.length === 2)
+                }
               >
                 <Text
                   style={[
                     styles.saveText,
-                    !(codeA.length === 2 && codeB.length === 2) &&
+                    (isAtletismo
+                      ? positions.some((p) => p.length < 1)
+                      : !(codeA.length === 2 && codeB.length === 2)) &&
                       styles.disabled,
                   ]}
                 >
@@ -323,40 +364,51 @@ export default function CategoryScreen({ route, navigation }) {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </ScrollView>
       </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#1D1B39" , paddingTop: 16 },
+  safe: { flex: 1, backgroundColor: "#1D1B39" },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16,
+    padding: 14,
     backgroundColor: "#2D529F",
     elevation: 4,
   },
-  headerTitle: { fontSize: 24, fontWeight: "800", color: "#FBBF09" },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#FBBF09",
+  },
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyText: { color: "#E8E8E8", fontSize: 18 },
+
   card: {
     backgroundColor: "#2D529F",
     margin: 12,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     elevation: 2,
   },
+
+  topIcons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  iconSpacing: { marginLeft: 16 },
+
   matchHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
   },
-  headerIcons: { flexDirection: "row" },
-  iconBtn: { marginHorizontal: 8 },
   teamText: {
     fontSize: 22,
     fontWeight: "900",
@@ -364,29 +416,64 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 2,
   },
-  scoreRow: {
+
+  scoreControls: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 8,
+    alignItems: "center",
   },
-  scoreControl: { flexDirection: "row", alignItems: "center" },
+  vsText: {
+    marginHorizontal: 12,
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#FBBF09",
+  },
   scoreInput: {
-    width: 60,
+    width: 50,
+    marginHorizontal: 6,
+    borderBottomWidth: 1,
+    borderColor: "#FFF",
     textAlign: "center",
+    fontSize: 20,
+    color: "#FFF",
+    paddingVertical: Platform.OS === "android" ? 2 : 6,
+  },
+
+  // Botón deshabilitado
+  disabledBtn: { opacity: 0.4 },
+
+  // Inputs deshabilitados
+  disabledInput: { backgroundColor: "#3B3A5A", color: "#777" },
+
+  positionsContainer: { marginTop: 12 },
+  positionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  positionLabel: {
+    width: 30,
+    fontSize: 18,
+    color: "#FBBF09",
+  },
+  positionInput: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#FBBF09",
     borderRadius: 6,
+    padding: Platform.OS === "android" ? 10 : 14,
     color: "#E8E8E8",
-    fontSize: 20,
+    fontSize: 18,
+    fontWeight: "700",
     backgroundColor: "#1D1B39",
-    marginHorizontal: 4,
+    textAlign: "center",
   },
-  disabledInput: { backgroundColor: "#3B3A5A", color: "#777" },
+
   modalBg: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: 20,
   },
   modalBox: {
     width: "85%",
@@ -432,7 +519,11 @@ const styles = StyleSheet.create({
     borderColor: "#FBBF09",
   },
   genderSelected: { backgroundColor: "#FBBF09" },
-  actionsRow: { flexDirection: "row", justifyContent: "space-between" },
+  actionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
   cancelText: { fontSize: 18, color: "#E8E8E8" },
   saveText: { fontSize: 18, fontWeight: "700", color: "#FBBF09" },
   disabled: { color: "#777" },
