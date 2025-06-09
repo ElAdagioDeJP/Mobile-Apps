@@ -8,4 +8,4 @@ const DEV_API = Platform.OS === "android"
 // En producción (URL de tu deploy en Railway)
 const PROD_API = "https://mobile-apps-production.up.railway.app"; // <--- PEGA LA URL AQUÍ
 
-export const API_URL = __DEV__ ? DEV_API : PROD_API;
+export const API_URL = "https://mobile-apps-production.up.railway.app"
