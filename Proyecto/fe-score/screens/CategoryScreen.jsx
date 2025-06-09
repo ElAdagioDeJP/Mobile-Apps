@@ -368,7 +368,7 @@ export default function CategoryScreen({ route, navigation }) {
   };
 
   const validateCode = text =>
-    text.toLowerCase().replace(/[^1-6ab]/g, '').slice(0, 2);
+    text.toLowerCase().replace(/[^1-6abu]/g, '').slice(0, 2);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -480,7 +480,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#1D1B39' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 14, backgroundColor: '#2D529F', elevation: 4,
+    padding: 14, backgroundColor: '#2D529F', elevation: 4, paddingTop: Platform.OS === 'android' ? 24 : 14,
   },
   headerTitle: { fontSize: 24, fontWeight: '800', color: '#FBBF09' },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
