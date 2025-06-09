@@ -16,7 +16,7 @@ if (Test-Path $venvPath) {
 }
 
 # Siempre instalar dependencias de Django desde requirements.txt si existe
-Write-Host "Instalando dependencias de Django..."
+Write-Host "Instalando dependencias de Flask..."
 if (Test-Path "requirements.txt") {
     pip install -r "requirements.txt"
 } else {
