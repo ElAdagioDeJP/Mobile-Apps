@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "La Fe Score",
-    "slug": "La Fe Score",
+    "slug": "La-Fe-Score",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo2.png",
@@ -20,10 +20,22 @@
         "foregroundImage": "./assets/logo2.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.eladagiodejp.LaFeScore"
     },
     "web": {
       "favicon": "./assets/logo2.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "931f2236-3235-41ad-9be7-67a51af13a88"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/931f2236-3235-41ad-9be7-67a51af13a88"
     }
   }
 }
