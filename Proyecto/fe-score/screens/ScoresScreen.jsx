@@ -4,19 +4,21 @@ import {
   Text,
   StyleSheet,
   SectionList,
-  TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { API_URL } from '../config';
 
-// Card para atletismo: muestra posiciones y género como ícono
 function AtletismoCard({ item }) {
   const genderIcon = item.gender === 'femenino' ? 'gender-female' : 'gender-male';
+  const pruebaLabel = item.category.replace('atletismo_', '').toUpperCase();
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
+      <View style={styles.headerRow}>
+        <Text style={styles.categoryText}>{`Atletismo: ${pruebaLabel}`}</Text>
         <Text style={styles.status}>{item.finished ? 'Cerrado' : 'En curso'}</Text>
-        <Icon name={genderIcon} size={20} style={styles.genderIcon} />
+      </View>
+      <View style={styles.genderRow}>
+        <Icon name={genderIcon} size={24} style={styles.genderIcon} />
       </View>
       {item.positions.map((pos, idx) => (
         <View key={idx} style={styles.positionRow}>
@@ -28,17 +30,26 @@ function AtletismoCard({ item }) {
   );
 }
 
-// Card para otras categorías: muestra código y marcador
 function MatchCard({ item }) {
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
+      <View style={styles.headerRow}>
         <Text style={styles.categoryText}>{item.categoryLabel}</Text>
         <Text style={styles.status}>{item.finished ? 'Finalizado' : 'En juego'}</Text>
       </View>
-      <View style={styles.matchRow}>
-        <Text style={styles.matchTeams}>{item.codeA} - {item.codeB}</Text>
-        <Text style={styles.matchScore}>{item.scoreA} <Text style={styles.dash}>–</Text> {item.scoreB}</Text>
+      <View style={styles.matchContainer}>
+        {/* Puntaje centralizado y destacado */}
+        <View style={styles.scoreBox}>
+          <Text style={styles.matchScore}>
+            {item.scoreA} <Text style={styles.dash}>–</Text> {item.scoreB}
+          </Text>
+        </View>
+        {/* Nombres de equipos en una sola fila */}
+        <View style={styles.teamsRow}>
+          <Text style={styles.teamName}>{item.codeA}</Text>
+          <Text style={styles.vsText}>vs</Text>
+          <Text style={styles.teamName}>{item.codeB}</Text>
+        </View>
       </View>
     </View>
   );
@@ -53,16 +64,17 @@ export default function ScoresScreen() {
         const res = await fetch(`${API_URL}/scores/`);
         if (!res.ok) throw new Error('No se pudieron cargar los puntajes');
         const data = await res.json();
-        // Agrupar por fecha dd/MM/yyyy
         const grouped = data.reduce((acc, item) => {
           const date = new Date(item.date).toLocaleDateString('es-ES');
           if (!acc[date]) acc[date] = [];
-          // añade etiqueta de categoría legible
           acc[date].push({ ...item });
           return acc;
         }, {});
         const formatted = Object.keys(grouped)
-          .sort((a, b) => new Date(b.split('/').reverse().join('-')) - new Date(a.split('/').reverse().join('-')))
+          .sort((a, b) =>
+            new Date(b.split('/').reverse().join('-'))
+            - new Date(a.split('/').reverse().join('-'))
+          )
           .map(date => ({ title: date, data: grouped[date] }));
         setSections(formatted);
       } catch (e) {
@@ -83,10 +95,12 @@ export default function ScoresScreen() {
           item.category.startsWith('atletismo_') ? (
             <AtletismoCard item={item} />
           ) : (
-            <MatchCard item={{
-              ...item,
-              categoryLabel: item.category.replace(/_/g, ' ')
-            }} />
+            <MatchCard
+              item={{
+                ...item,
+                categoryLabel: item.category.replace(/_/g, ' ')
+              }}
+            />
           )
         }
         contentContainerStyle={styles.list}
@@ -106,11 +120,14 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   sectionHeader: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 28,
+    fontWeight: '900',
     color: '#FBBF09',
     marginTop: 16,
     marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   card: {
     backgroundColor: '#2D529F',
@@ -119,17 +136,27 @@ const styles = StyleSheet.create({
     padding: 16,
     elevation: 5,
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  categoryText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#FFF',
+    textTransform: 'capitalize',
   },
   status: {
     fontSize: 14,
     fontWeight: '700',
     color: '#FBBF09',
     textTransform: 'uppercase',
+  },
+  genderRow: {
+    alignItems: 'flex-end',
+    marginBottom: 12,
   },
   genderIcon: {
     color: '#E8E8E8',
@@ -149,25 +176,43 @@ const styles = StyleSheet.create({
     color: '#E8E8E8',
     fontWeight: '700',
   },
-  matchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  matchContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  matchTeams: {
-    fontSize: 18,
-    color: '#E8E8E8',
-    flex: 1,
+  scoreBox: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
   },
   matchScore: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '900',
     color: '#FFF',
+    textAlign: 'center',
   },
   dash: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: '900',
     color: '#FBBF09',
-    marginHorizontal: 6,
+    marginHorizontal: 4,
+  },
+  teamsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  teamName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#E8E8E8',
+    marginHorizontal: 8,
+  },
+  vsText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FBBF09',
   },
 });

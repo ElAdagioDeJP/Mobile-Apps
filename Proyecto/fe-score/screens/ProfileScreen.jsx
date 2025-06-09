@@ -14,7 +14,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../config";
 import { encode as btoa } from "base-64";
-import { showMessage } from "react-native-flash-message";  // ← importar
+import { showMessage } from "react-native-flash-message";
 
 const COLORS = {
   primary: "#6C5CE7",
@@ -25,6 +25,7 @@ const COLORS = {
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const canSubmit = email.length > 0 && password.length > 0;
 
@@ -54,12 +55,13 @@ export default function LoginScreen({ navigation }) {
         icon: "success",
       });
 
-      // Navegar tras un breve delay para que el usuario lea el toast
+      // Resetear campos
+      setEmail("");
+      setPassword("");
+      
+      // Navegar tras un breve delay
       setTimeout(() => {
-        navigation.navigate("Inicio", {
-          screen: "Category",
-          params: { key: "futbol", label: "Fútbol" },
-        });
+        navigation.navigate("Inicio");
       }, 800);
     } catch (e) {
       // Mensaje de error
@@ -102,10 +104,20 @@ export default function LoginScreen({ navigation }) {
           style={styles.input}
           placeholder="Contraseña"
           placeholderTextColor={COLORS.greyText}
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
         />
+        <TouchableOpacity 
+          onPress={() => setShowPassword(!showPassword)}
+          style={styles.passwordToggle}
+        >
+          <Icon 
+            name={showPassword ? "eye-off-outline" : "eye-outline"} 
+            size={20} 
+            color={COLORS.greyText} 
+          />
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
@@ -131,7 +143,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 2,
   },
-  input: { flex: 1, marginLeft: 8, fontSize: 16, color: "#FFF" },
+  input: { 
+    flex: 1, 
+    marginLeft: 8, 
+    fontSize: 16, 
+    color: "#FFF",
+    paddingRight: 8,
+  },
   button: {
     backgroundColor: COLORS.primary,
     borderRadius: 8,
@@ -144,4 +162,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#2D529F",
   },
   buttonText: { color: COLORS.white, fontSize: 16, fontWeight: "600" },
+  passwordToggle: {
+    padding: 8,
+    marginRight: -8,
+  },
 });
