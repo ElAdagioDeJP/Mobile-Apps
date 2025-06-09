@@ -7,3 +7,5 @@ Flask-Cors
 Cors
 marshmallow
 marshmallow-sqlalchemy
+Gunicorn
+psycopg2-binary

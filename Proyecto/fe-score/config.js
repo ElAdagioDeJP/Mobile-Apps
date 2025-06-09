@@ -6,6 +6,6 @@ const DEV_API = Platform.OS === "android"
   : "http://localhost:5000"; // iOS simulator o expo web
 
 // En producción (URL de tu deploy en Heroku/Railway/etc.)
-const PROD_API = "https://mi-backend.herokuapp.com";
+const PROD_API = "mobile-apps-production.up.railway.app";
 
 export const API_URL = __DEV__ ? DEV_API : PROD_API;

@@ -1,0 +1,11 @@
+{
+  "builds": [
+    {
+      "src": "backend/*",
+      "use": "@railway/python",
+      "config": {
+        "runtime": "python3.9"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+./backend/instance/.env
+*.db
+*.sqlite
+__pycache__/
+# Ignorar sólo ese .env
+backend/instance/.env
+
+# (opcional) Ignorar cualquier .env
+*.env
+*.env.*
