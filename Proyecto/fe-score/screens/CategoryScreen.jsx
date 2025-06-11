@@ -736,6 +736,4 @@ avionResultCode: {
 avionResultIcon: {
   marginTop: 2,
 },
-
-
 });
