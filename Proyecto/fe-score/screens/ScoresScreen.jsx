@@ -25,7 +25,6 @@ function AtletismoCard({ item }) {
   );
 }
 
-// NUEVO COMPONENTE PARA VUELO DE AVIÓN
 function AvionCard({ item }) {
   return (
     <View style={styles.card}>
@@ -34,17 +33,51 @@ function AvionCard({ item }) {
         <Text style={styles.status}>{item.finished ? 'Finalizado' : 'En curso'}</Text>
       </View>
       <View style={styles.avionResultsContainer}>
-        {/* Ganador Masculino */}
         <View style={styles.avionRow}>
           <Icon name="gender-male" size={24} style={styles.avionGenderIcon} />
           <Text style={styles.avionLabel}>1er Lugar Masculino:</Text>
           <Text style={styles.avionValue}>{item.positions[0] || 'N/A'}</Text>
         </View>
-        {/* Ganadora Femenina */}
         <View style={styles.avionRow}>
           <Icon name="gender-female" size={24} style={styles.avionGenderIcon} />
           <Text style={styles.avionLabel}>1er Lugar Femenino:</Text>
           <Text style={styles.avionValue}>{item.positions[1] || 'N/A'}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// NUEVO COMPONENTE PARA AJEDREZ
+function ChessCard({ item }) {
+  return (
+    <View style={styles.card}>
+      <View style={styles.avionHeader}>
+        <Text style={styles.categoryText}>Ajedrez</Text>
+        <Text style={styles.status}>{item.finished ? 'Finalizado' : 'En curso'}</Text>
+      </View>
+      <View style={styles.avionResultsContainer}>
+        {/* 1° y 2° Lugar Masculino */}
+        <View style={styles.avionRow}>
+          <Icon name="gender-male" size={24} style={styles.avionGenderIcon} />
+          <Text style={styles.avionLabel}>1er Lugar Masculino:</Text>
+          <Text style={styles.avionValue}>{item.positions[0] || 'N/A'}</Text>
+        </View>
+        <View style={styles.avionRow}>
+          <Icon name="gender-male" size={24} style={styles.avionGenderIcon} />
+          <Text style={styles.avionLabel}>2do Lugar Masculino:</Text>
+          <Text style={styles.avionValue}>{item.positions[1] || 'N/A'}</Text>
+        </View>
+        {/* 1° y 2° Lugar Femenino */}
+        <View style={styles.avionRow}>
+          <Icon name="gender-female" size={24} style={styles.avionGenderIcon} />
+          <Text style={styles.avionLabel}>1er Lugar Femenino:</Text>
+          <Text style={styles.avionValue}>{item.positions[2] || 'N/A'}</Text>
+        </View>
+        <View style={styles.avionRow}>
+          <Icon name="gender-female" size={24} style={styles.avionGenderIcon} />
+          <Text style={styles.avionLabel}>2do Lugar Femenino:</Text>
+          <Text style={styles.avionValue}>{item.positions[3] || 'N/A'}</Text>
         </View>
       </View>
     </View>
@@ -107,16 +140,17 @@ export default function ScoresScreen() {
     <View style={styles.container}>
       <SectionList
         sections={sections}
-        keyExtractor={item => item.id}
+        keyExtractor={item => String(item.id)}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={styles.sectionHeader}>{title}</Text>
         )}
-        // LÓGICA DE RENDERIZADO MODIFICADA
         renderItem={({ item }) => {
           if (item.category.startsWith('atletismo_')) {
             return <AtletismoCard item={item} />;
           } else if (item.category === 'vuelo_avion') {
             return <AvionCard item={item} />;
+          } else if (item.category === 'ajedrez') {
+            return <ChessCard item={item} />;
           } else {
             return (
               <MatchCard
@@ -179,7 +213,7 @@ const styles = StyleSheet.create({
     color: '#FBBF09',
     textTransform: 'uppercase',
   },
-  // --- Estilos Atletismo ---
+  // Atletismo
   genderRow: {
     alignItems: 'flex-end',
     marginBottom: 12,
@@ -202,16 +236,12 @@ const styles = StyleSheet.create({
     color: '#E8E8E8',
     fontWeight: '700',
   },
-  // --- Estilos Vuelo Avión (NUEVOS) ---
+  // Vuelo Avión y Ajedrez
   avionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
-  },
-  trophyIcon: {
-    color: '#FBBF09',
-    marginHorizontal: 10,
   },
   avionResultsContainer: {
     paddingLeft: 8,
@@ -235,7 +265,7 @@ const styles = StyleSheet.create({
     color: '#FBBF09',
     marginLeft: 8,
   },
-  // --- Estilos Partidos (Match) ---
+  // Partidos
   matchContainer: {
     alignItems: 'center',
     justifyContent: 'center',
