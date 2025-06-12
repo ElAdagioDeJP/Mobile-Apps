@@ -21,6 +21,7 @@
     "eslint-plugin-prettier": "^5.4.0",
     "expo": "~53.0.9",
     "expo-status-bar": "~2.2.3",
+    "expo-updates": "~0.28.14",
     "prettier": "^3.5.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -30,14 +31,13 @@
     "react-native-screens": "~4.11.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "^0.20.0",
-    "react-navigation": "^5.0.0",
-    "expo-updates": "~0.28.14"
+    "react-navigation": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "latest",
     "eslint": "^9.0.0",
-    "eslint-config-expo": "~9.2.0",
-    "@react-native-community/cli": "latest"
+    "eslint-config-expo": "~9.2.0"
   },
   "private": true
 }

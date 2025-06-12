@@ -131,7 +131,4 @@ const styles = StyleSheet.create({
     color: '#FBBF09',           // Dorado premium
   }
 });
-
-
-
 export default Main;
