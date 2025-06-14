@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, SectionList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { API_URL } from '../config';
 
+// --- COMPONENTES DE TARJETAS (SIN CAMBIOS) ---
+
 function AtletismoCard({ item }) {
   const genderIcon = item.gender === 'femenino' ? 'gender-female' : 'gender-male';
   const pruebaLabel = item.category.replace('atletismo_', '').toUpperCase();
@@ -48,7 +50,6 @@ function AvionCard({ item }) {
   );
 }
 
-// NUEVO COMPONENTE PARA AJEDREZ
 function ChessCard({ item }) {
   return (
     <View style={styles.card}>
@@ -107,34 +108,46 @@ function MatchCard({ item }) {
   );
 }
 
+// --- COMPONENTE PRINCIPAL DE LA PANTALLA (MODIFICADO) ---
+
 export default function ScoresScreen() {
   const [sections, setSections] = useState([]);
 
+  // Función para obtener y procesar los datos de la API
+  const fetchData = async () => {
+    try {
+      const res = await fetch(`${API_URL}/scores/`);
+      if (!res.ok) throw new Error('No se pudieron cargar los puntajes');
+      const data = await res.json();
+      const grouped = data.reduce((acc, item) => {
+        const date = new Date(item.date).toLocaleDateString('es-ES');
+        if (!acc[date]) acc[date] = [];
+        acc[date].push({ ...item });
+        return acc;
+      }, {});
+      const formatted = Object.keys(grouped)
+        .sort(
+          (a, b) =>
+            new Date(b.split('/').reverse().join('-')) -
+            new Date(a.split('/').reverse().join('-'))
+        )
+        .map(date => ({ title: date, data: grouped[date] }));
+      setSections(formatted);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch(`${API_URL}/scores/`);
-        if (!res.ok) throw new Error('No se pudieron cargar los puntajes');
-        const data = await res.json();
-        const grouped = data.reduce((acc, item) => {
-          const date = new Date(item.date).toLocaleDateString('es-ES');
-          if (!acc[date]) acc[date] = [];
-          acc[date].push({ ...item });
-          return acc;
-        }, {});
-        const formatted = Object.keys(grouped)
-          .sort(
-            (a, b) =>
-              new Date(b.split('/').reverse().join('-')) -
-              new Date(a.split('/').reverse().join('-'))
-          )
-          .map(date => ({ title: date, data: grouped[date] }));
-        setSections(formatted);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, []);
+    // 1. Llama a la API inmediatamente al montar el componente
+    fetchData(); 
+
+    // 2. Establece un intervalo para llamar a la API cada 5 segundos
+    const intervalId = setInterval(fetchData, 5000); 
+
+    // 3. Limpia el intervalo cuando el componente se desmonte para evitar fugas de memoria
+    return () => clearInterval(intervalId); 
+  }, []); // El array vacío asegura que el efecto se ejecute solo una vez (al montar y desmontar)
 
   return (
     <View style={styles.container}>
@@ -167,6 +180,8 @@ export default function ScoresScreen() {
     </View>
   );
 }
+
+// --- ESTILOS (SIN CAMBIOS) ---
 
 const styles = StyleSheet.create({
   container: {

@@ -328,7 +328,7 @@ export default function CategoryScreen({ route, navigation }) {
               <Icon name="plus-circle" size={24} color="#FFF" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.vsText}>vs</Text>
+          <Text style={styles.vsText}></Text>
           <View style={styles.teamScoreContainer}>
             <TouchableOpacity onPress={() => changeScore(item, 'B', -1)} disabled={isMatchFinished || !isAuthenticated} style={[styles.scoreBtn, (isMatchFinished || !isAuthenticated) && styles.disabledBtn]}>
               <Icon name="minus-circle" size={24} color="#FFF" />
